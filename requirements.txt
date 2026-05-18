@@ -1,3 +1,18 @@
-streamlit
-plotly
-kiteconnect
+# QuantDesk Pro — Institutional Trading Dashboard
+# Requirements
+# Run: pip install -r requirements.txt
+# Launch: streamlit run trading_dashboard.py
+
+streamlit>=1.35.0
+pandas>=2.0.0
+numpy>=1.24.0
+pytz>=2024.1
+
+# ── Optional: Real Broker API SDKs ────────────────────────────────────────
+# Uncomment whichever broker you use, then swap SimulatedBrokerAPI methods.
+
+# Zerodha Kite Connect (SEBI-registered)
+# kiteconnect>=5.0.1
+
+# DhanHQ (SEBI-registered)
+# dhanhq>=2.0.0
