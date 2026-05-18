@@ -76,11 +76,11 @@ st.markdown("""
         
         /* Clean Tables */
         .price-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        .price-table td { padding: 6px 0px; border-bottom: 1px solid #222; font-size: 0.9rem; }
+        .price-table td { padding: 6px 0px; border-bottom: 1px solid #222; font-size: 0.9rem; color: #ccc; }
         .price-target { font-weight: 700; color: #00ffcc; font-size: 1.05rem; }
         .price-sl { font-weight: 700; color: #ff3366; font-size: 1.05rem; }
     </style>
-""", unsafe_with_html_safe=True)
+""", unsafe_allow_html=True)
 
 st.title("🛡️ Direct Execution Command Center")
 st.caption(f"Live Feed Active | Cycle: #{st.session_state.run_count} | Auto-Sorting Engine")
@@ -111,7 +111,6 @@ def fetch_live_market_stream():
     base_prices = {"TECHM": 1428.00, "INFY": 1129.70, "TATASTEEL": 205.20, "SBIN": 832.00, "RELIANCE": 2462.00}
     atrs = {"TECHM": 26.0, "INFY": 19.0, "TATASTEEL": 5.1, "SBIN": 13.0, "RELIANCE": 38.0}
     
-    # Pre-assigned structured times to keep interface pristine
     times = {
         "TECHM": {"entry": "14:25", "exit": "15:10"},
         "INFY": {"entry": "14:35", "exit": "15:15"},
@@ -136,7 +135,6 @@ live_data = fetch_live_market_stream()
 
 # --- ENGINE VIEW CATEGORIES ---
 if category == "⚡ INTRADAY CALLS":
-    # CRITICAL SORTING: Highest profit always climbs to the top card block
     sorted_data = live_data.sort_values(by="Margin", ascending=False)
     
     for _, row in sorted_data.head(3).iterrows():
@@ -148,7 +146,6 @@ if category == "⚡ INTRADAY CALLS":
         target = round(row['CMP'] - (row['ATR'] * 1.5), 2) if is_short else round(row['CMP'] + (row['ATR'] * 1.5), 2)
         sl = round(row['CMP'] + (row['ATR'] * 1.0), 2) if is_short else round(row['CMP'] - (row['ATR'] * 1.0), 2)
 
-        # HTML Block UI Generation Loop
         st.markdown(f"""
             <div class="{card_style}">
                 <div class="{badge_style}">GAINS: +{row['Margin']}%</div>
@@ -162,13 +159,13 @@ if category == "⚡ INTRADAY CALLS":
                 </div>
                 
                 <table class="price-table">
-                    <tr><td>Action Direction:</td><td style="font-weight:700; text-align:right;">{action_label}</td></tr>
-                    <tr><td>Execution Trigger:</td><td style="font-weight:700; text-align:right;">₹{row['CMP']}</td></tr>
+                    <tr><td>Action Direction:</td><td style="font-weight:700; text-align:right; color:#fff;">{action_label}</td></tr>
+                    <tr><td>Execution Trigger:</td><td style="font-weight:700; text-align:right; color:#fff;">₹{row['CMP']}</td></tr>
                     <tr><td>Target Goal Level:</td><td class="price-target" style="text-align:right;">₹{target}</td></tr>
                     <tr><td>Invalidation Floor:</td><td class="price-sl" style="text-align:right;">₹{sl}</td></tr>
                 </table>
             </div>
-        """, unsafe_with_html_safe=True)
+        """, unsafe_allow_html=True)
 
 elif category == "📦 FUTURE & OPTIONS (F&O)":
     sorted_data = live_data.sort_values(by="CMP", ascending=True)
@@ -190,10 +187,9 @@ elif category == "📦 FUTURE & OPTIONS (F&O)":
                     <tr><td>Safety Invalidation Boundary:</td><td class="price-sl" style="text-align:right;">₹{round(row['CMP'] - row['ATR'], 2)}</td></tr>
                 </table>
             </div>
-        """, unsafe_with_html_safe=True)
+        """, unsafe_allow_html=True)
 
 elif category == "⏳ LONG TERM HOLDINGS":
-    # Multipliers representing long-horizon yield structures
     lt_targets = {"TECHM": 23.5, "INFY": 18.0, "TATASTEEL": 14.2, "SBIN": 19.4, "RELIANCE": 12.5}
     sorted_data = live_data.sort_values(by="Ticker", ascending=True)
     
@@ -214,7 +210,7 @@ elif category == "⏳ LONG TERM HOLDINGS":
                     <tr><td>Structural Sale Target:</td><td class="price-target" style="text-align:right;">₹{round(row['CMP'] * (1 + lt_targets[row['Ticker']]/100), 2)}</td></tr>
                 </table>
             </div>
-        """, unsafe_with_html_safe=True)
+        """, unsafe_allow_html=True)
 
 # 4. LOOP CONTROL RE-RUNNER
 time.sleep(5)
