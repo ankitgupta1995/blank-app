@@ -79,22 +79,59 @@ st.markdown(header_html, unsafe_allow_html=True)
 category = st.radio("Mode:", ["⚡ INTRADAY", "📦 F&O", "⏳ LONG TERM"], horizontal=True, label_visibility="collapsed")
 st.markdown("<br>", unsafe_allow_html=True)
 
-# --- 5. DATA SIMULATION ---
+# --- 5. THE 4-TIER CONFLUENCE ENGINE ---
 @st.cache_data(ttl=2)
 def fetch_market_stream():
     stocks = ["TECHM", "INFY", "TATASTEEL", "SBIN", "RELIANCE", "HDFCBANK"]
     base_prices = {"TECHM": 1428.00, "INFY": 1129.70, "TATASTEEL": 205.20, "SBIN": 832.00, "RELIANCE": 2462.00, "HDFCBANK": 1430.50}
     atrs = {"TECHM": 26.0, "INFY": 19.0, "TATASTEEL": 5.1, "SBIN": 13.0, "RELIANCE": 38.0, "HDFCBANK": 22.0}
     
+    # 1. SYSTEM REGIME CHECK (Master Switch)
+    current_vix = 18.5  # Simulated live India VIX
+    regime_clear = current_vix < 20.0
+    
     matrix = []
+    
     for s in stocks:
         tick = np.random.uniform(-0.004, 0.005) * base_prices[s]
         cmp = round(base_prices[s] + tick, 2)
-        margin = round((atrs[s] * 1.5) / cmp * 100, 2)
-        matrix.append({"Ticker": s, "CMP": cmp, "ATR": atrs[s], "Margin": margin})
-    return pd.DataFrame(matrix)
+        
+        # --- SIMULATING LIVE EXCHANGE DATA ---
+        relative_volume = np.random.uniform(0.8, 2.8) # How much volume vs 30-day average
+        price_vs_vwap = np.random.choice(["Above", "Below"]) 
+        liquidity_sweep = np.random.choice([True, False]) # Did it trigger stop-losses?
+        
+        # --- THE 4-TIER GATEKEEPER LOGIC ---
+        # 1. Regime: Is the broader market safe for directional plays?
+        # 2. Footprint: Is Relative Volume (RVOL) > 1.5x?
+        # 3. Liquidity: Did big money sweep a major level today?
+        # 4. Momentum: Is the stock holding above the institutional VWAP?
+        
+        footprint_clear = relative_volume >= 1.5
+        liquidity_clear = liquidity_sweep == True
+        momentum_clear = price_vs_vwap == "Above"
+        
+        # STRICT FILTER: Only proceed if ALL 4 conditions are perfectly aligned
+        if regime_clear and footprint_clear and liquidity_clear and momentum_clear:
+            margin = round((atrs[s] * 1.5) / cmp * 100, 2)
+            theta_decay = round(np.random.uniform(15.00, 35.00), 2) 
+            
+            matrix.append({
+                "Ticker": s, 
+                "CMP": cmp, 
+                "ATR": atrs[s], 
+                "Margin": margin, 
+                "Theta": theta_decay
+            })
+            
+    # If no stocks pass the strict filter, return an empty dataframe safely
+    return pd.DataFrame(matrix) if matrix else pd.DataFrame(columns=["Ticker", "CMP", "ATR", "Margin", "Theta"])
 
 live_data = fetch_market_stream()
+
+# --- FAILSAFE UI MESSAGE ---
+if live_data.empty and category == "⚡ INTRADAY":
+    st.warning("⚠️ **Zero Confluence Detected.** No stocks passed the 4-tier institutional filter. Capital preservation mode active.")
 
 # --- 6. RENDER 2-COLUMN GRID CARDS ---
 if category == "⚡ INTRADAY":
